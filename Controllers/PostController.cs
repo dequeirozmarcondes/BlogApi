@@ -1,12 +1,11 @@
-﻿using BlogApi.Dtos;
-using BlogApi.Models;
-using BlogApi.Services;
-using Microsoft.AspNetCore.Http;
+﻿using BlogApi.Core.Entities;
 using Microsoft.AspNetCore.Mvc;
+using BlogApi.Dtos; // Adicione esta diretiva
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using static BlogApi.Dtos.PostDTO;
+using BlogApi.IServices;
 
 namespace BlogApi.Controllers
 {
@@ -16,6 +15,7 @@ namespace BlogApi.Controllers
     {
         private readonly IPostService _postService;
 
+        // Construtor que injeta o serviço de posts
         public PostController(IPostService postService)
         {
             _postService = postService;
@@ -29,19 +29,20 @@ namespace BlogApi.Controllers
             var postDtos = posts.Select(post => new PostListDto
             {
                 Id = post.Id,
-                Title = post.Title
+                Title = post.Title,
+                Content = post.Content
             });
 
             return Ok(postDtos);
         }
 
-        // GET: api/Post/5
+        // GET: api/Post/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<PostDetailsDto>> Details(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
-                return NotFound();
+                return BadRequest("ID cannot be null or empty.");
             }
 
             var post = await _postService.GetPostByIdAsync(id);
@@ -62,61 +63,48 @@ namespace BlogApi.Controllers
 
         // POST: api/Post
         [HttpPost]
-        public async Task<ActionResult<PostCreateDto>> Create([Bind("Title,Content")] PostCreateDto postDto)
+        public async Task<ActionResult<PostCreateDto>> Create([FromBody] PostCreateDto postDto)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (ModelState.IsValid)
-                {
-                    var post = new Post
-                    {
-                        Title = postDto.Title,
-                        Content = postDto.Content
-                    };
+                return BadRequest(ModelState);
+            }
 
-                    await _postService.AddPostAsync(post);
-                    return CreatedAtAction(nameof(Details), new { id = post.Id }, postDto);
-                }
-            }
-            catch
-            {
-                ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists, see your system administrator.");
-            }
-            return BadRequest(ModelState);
+            var post = new Post(
+                Guid.NewGuid().ToString(), // Generate a new ID
+                postDto.Title,
+                postDto.Content
+            );
+
+            await _postService.AddPostAsync(post);
+            return CreatedAtAction(nameof(Details), new { id = post.Id }, postDto);
         }
 
-        // PUT: api/Post/5
+        // PUT: api/Post/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> Edit(string id, [Bind("Id,Title,Content")] PostEditDto postDto)
+        public async Task<IActionResult> Edit(string id, [FromBody] PostEditDto postDto)
         {
             if (id != postDto.Id)
             {
-                return BadRequest();
+                return BadRequest("The provided ID does not match the ID in the body.");
             }
 
-            try
+            if (!ModelState.IsValid)
             {
-                if (ModelState.IsValid)
-                {
-                    var post = new Post
-                    {
-                        Id = postDto.Id,
-                        Title = postDto.Title,
-                        Content = postDto.Content
-                    };
+                return BadRequest(ModelState);
+            }
 
-                    await _postService.UpdatePostAsync(post);
-                    return NoContent();
-                }
-            }
-            catch
-            {
-                ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists, see your system administrator.");
-            }
-            return BadRequest(ModelState);
+            var post = new Post(
+                postDto.Id,
+                postDto.Title,
+                postDto.Content
+            );
+
+            await _postService.UpdatePostAsync(post);
+            return NoContent();
         }
 
-        // DELETE: api/Post/5
+        // DELETE: api/Post/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {

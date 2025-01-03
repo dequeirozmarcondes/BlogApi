@@ -1,40 +1,42 @@
-﻿using BlogApi.Models;
-using static BlogApi.Models.IPostRepositories;
+﻿using BlogApi.Core.Entities;
+using BlogApi.Core.IRepository;
+using BlogApi.IServices;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BlogApi.Services
 {
-    public class PostService : IPostService
+    public class PostService(IPostRepository postRepository) : IPostService
     {
-        private readonly IPostRepository _postRepository;
 
-        public PostService(IPostRepository postRepository)
-        {
-            _postRepository = postRepository;
-        }
-
+        // Retorna todos os posts
         public async Task<IEnumerable<Post>> GetAllPostsAsync()
         {
-            return await _postRepository.GetAllPostsAsync();
+            return await postRepository.GetAllPostsAsync();
         }
 
+        // Retorna um post específico pelo ID
         public async Task<Post> GetPostByIdAsync(string id)
         {
-            return await _postRepository.GetPostByIdAsync(id);
+            return await postRepository.GetPostByIdAsync(id);
         }
 
+        // Adiciona um novo post
         public async Task AddPostAsync(Post post)
         {
-            await _postRepository.AddPostAsync(post);
+            await postRepository.AddPostAsync(post);
         }
 
+        // Atualiza um post existente
         public async Task UpdatePostAsync(Post post)
         {
-            await _postRepository.UpdatePostAsync(post);
+            await postRepository.UpdatePostAsync(post);
         }
 
+        // Deleta um post pelo ID
         public async Task DeletePostAsync(string id)
         {
-            await _postRepository.DeletePostAsync(id);
+            await postRepository.DeletePostAsync(id);
         }
     }
 }

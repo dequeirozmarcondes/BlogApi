@@ -1,8 +1,10 @@
-﻿using BlogApi.Models;
+﻿using BlogApi.Core.Entities;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace BlogApi.Services
+namespace BlogApi.Core.IRepository
 {
-    public interface IPostService
+    public interface IPostRepository
     {
         Task<IEnumerable<Post>> GetAllPostsAsync();
         Task<Post> GetPostByIdAsync(string id);

@@ -1,9 +1,13 @@
 using BlogApi.Services;
 using Raven.Client.Documents;
+using Raven.Client.Documents.Session;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
-using static BlogApi.Data.Repositories;
-using static BlogApi.Models.IPostRepositories;
+using BlogApi.Core.IRepository;
+using BlogApi.Core.Entities;
+using Microsoft.AspNetCore.Identity;
+using BlogApi.IServices;
+using BlogApi.Data.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,9 +23,7 @@ static X509Certificate2 LoadCertificate(string path)
 
     if (certType == X509ContentType.Pfx || certType == X509ContentType.Authenticode)
     {
-#pragma warning disable SYSLIB0057
         return new X509Certificate2(path);
-#pragma warning restore SYSLIB0057
     }
 
     throw new CryptographicException($"O tipo do certificado no caminho especificado ({certType}) não é compatível.");
@@ -51,19 +53,37 @@ builder.Services.AddSingleton<IDocumentStore>(provider =>
     return store;
 });
 
-// Add services to the container.
+// Registro do IAsyncDocumentSession
+builder.Services.AddScoped<IAsyncDocumentSession>(provider =>
+    provider.GetRequiredService<IDocumentStore>().OpenAsyncSession());
+
+// Adicionar serviços ao contêiner
+
+// Configure Identity
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddUserStore<RavenUserStore>() // Use a implementação personalizada para usuários
+    .AddRoleStore<RavenRoleStore>() // Use a implementação personalizada para papéis
+    .AddDefaultTokenProviders();
+
+// Registrando serviços e repositórios
+builder.Services.AddScoped<ICommentsPostService, CommentsPostService>();
+builder.Services.AddScoped<ILikePostService, LikePostService>();
+builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddScoped<IApplicationUserService, ApplicationUserService>();
+
+builder.Services.AddScoped<ICommentsPostRepository, CommentsPostRepository>();
+builder.Services.AddScoped<ILikePostRepository, LikePostRepository>();
+builder.Services.AddScoped<IPostRepository, PostRepository>();
+builder.Services.AddScoped<IApplicationUserRepository, ApplicationUserRepository>();
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Aprender mais sobre configuração Swagger/OpenAPI em https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<IPostRepository, PostRepository>();
-builder.Services.AddSingleton<IPostService, PostService>();
-
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure o pipeline de solicitação HTTP.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -72,6 +92,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
