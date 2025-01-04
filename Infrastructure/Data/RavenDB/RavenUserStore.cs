@@ -1,13 +1,20 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Raven.Client.Documents.Session;
 using BlogApi.Core.Entities;
-using Microsoft.EntityFrameworkCore;
+using System.Threading;
+using System.Threading.Tasks;
+using Raven.Client.Documents;
 
 namespace BlogApi.Infrastructure.Data.RavenDB
 {
-    public class RavenUserStore(IAsyncDocumentSession session) : IUserStore<ApplicationUser>, IUserPasswordStore<ApplicationUser>
+    public class RavenUserStore : IUserStore<ApplicationUser>, IUserPasswordStore<ApplicationUser>
     {
-        private readonly IAsyncDocumentSession _session = session ?? throw new ArgumentNullException(nameof(session));
+        private readonly IAsyncDocumentSession _session;
+
+        public RavenUserStore(IAsyncDocumentSession session)
+        {
+            _session = session ?? throw new ArgumentNullException(nameof(session));
+        }
 
         public async Task<IdentityResult> CreateAsync(ApplicationUser user, CancellationToken cancellationToken)
         {
@@ -32,13 +39,16 @@ namespace BlogApi.Infrastructure.Data.RavenDB
         public async Task<ApplicationUser?> FindByIdAsync(string userId, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
+
             return await _session.LoadAsync<ApplicationUser>(userId, cancellationToken);
         }
 
-        public async Task<ApplicationUser?> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
+        public async Task<ApplicationUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return await _session.Query<ApplicationUser>().FirstOrDefaultAsync(u => u.NormalizedUserName == normalizedUserName, cancellationToken);
+
+            return await _session.Query<ApplicationUser>()
+                .FirstOrDefaultAsync(u => u.NormalizedUserName == normalizedUserName, cancellationToken);
         }
 
         public Task<string?> GetNormalizedUserNameAsync(ApplicationUser user, CancellationToken cancellationToken)

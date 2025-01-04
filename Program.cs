@@ -66,6 +66,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddRoleStore<RavenRoleStore>() // Use a implementação personalizada para papéis
     .AddDefaultTokenProviders();
 
+builder.Services.AddScoped<UserManager<ApplicationUser>>();
+builder.Services.AddScoped<RoleManager<IdentityRole>>();
+
 // Registrando serviços e repositórios
 builder.Services.AddScoped<ICommentsPostService, CommentsPostService>();
 builder.Services.AddScoped<ILikePostService, LikePostService>();

@@ -1,16 +1,19 @@
 ﻿using BlogApi.Application.IServices;
 using BlogApi.Core.Entities;
 using BlogApi.Core.IRepository;
+using Microsoft.AspNetCore.Identity;
 
 namespace BlogApi.Application.Services
 {
     public class ApplicationUserService : IApplicationUserService
     {
         private readonly IApplicationUserRepository _userRepository;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public ApplicationUserService(IApplicationUserRepository userRepository)
+        public ApplicationUserService(IApplicationUserRepository userRepository, UserManager<ApplicationUser> userManager)
         {
             _userRepository = userRepository;
+            _userManager = userManager;
         }
 
         public async Task<ApplicationUser> GetUserByIdAsync(string userId)
@@ -28,19 +31,33 @@ namespace BlogApi.Application.Services
             return await _userRepository.GetAllUsersAsync();
         }
 
-        public async Task AddUserAsync(ApplicationUser user)
+        public async Task<IdentityResult> AddUserAsync(ApplicationUser user, string password)
         {
-            await _userRepository.AddUserAsync(user);
+            var result = await _userManager.CreateAsync(user, password);
+            if (result.Succeeded)
+            {
+                await _userRepository.AddUserAsync(user);
+            }
+            return result;
         }
 
-        public async Task UpdateUserAsync(ApplicationUser user)
+        public async Task<IdentityResult> UpdateUserAsync(ApplicationUser user)
         {
-            await _userRepository.UpdateUserAsync(user);
+            var result = await _userManager.UpdateAsync(user);
+            if (result.Succeeded)
+            {
+                await _userRepository.UpdateUserAsync(user);
+            }
+            return result;
         }
 
         public async Task DeleteUserAsync(string userId)
         {
-            await _userRepository.DeleteUserAsync(userId);
+            var user = await GetUserByIdAsync(userId);
+            if (user != null)
+            {
+                await _userRepository.DeleteUserAsync(userId);
+            }
         }
     }
 }

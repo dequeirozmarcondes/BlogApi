@@ -1,4 +1,5 @@
 ﻿using BlogApi.Core.Entities;
+using Microsoft.AspNetCore.Identity;
 
 namespace BlogApi.Application.IServices
 {
@@ -7,8 +8,8 @@ namespace BlogApi.Application.IServices
         Task<ApplicationUser> GetUserByIdAsync(string userId);
         Task<ApplicationUser> GetUserByUserNameAsync(string userName);
         Task<IEnumerable<ApplicationUser>> GetAllUsersAsync();
-        Task AddUserAsync(ApplicationUser user);
-        Task UpdateUserAsync(ApplicationUser user);
+        Task<IdentityResult> AddUserAsync(ApplicationUser user, string password);
+        Task<IdentityResult> UpdateUserAsync(ApplicationUser user);
         Task DeleteUserAsync(string userId);
     }
 }

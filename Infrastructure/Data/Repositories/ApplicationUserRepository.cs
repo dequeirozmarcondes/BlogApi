@@ -5,9 +5,14 @@ using Raven.Client.Documents.Session;
 
 namespace BlogApi.Infrastructure.Data.Repositories
 {
-    public class ApplicationUserRepository(IAsyncDocumentSession session) : IApplicationUserRepository
+    public class ApplicationUserRepository : IApplicationUserRepository
     {
-        private readonly IAsyncDocumentSession _session = session ?? throw new ArgumentNullException(nameof(session));
+        private readonly IAsyncDocumentSession _session;
+
+        public ApplicationUserRepository(IAsyncDocumentSession session)
+        {
+            _session = session ?? throw new ArgumentNullException(nameof(session));
+        }
 
         public async Task<ApplicationUser> GetUserByIdAsync(string userId)
         {
@@ -16,7 +21,8 @@ namespace BlogApi.Infrastructure.Data.Repositories
 
         public async Task<ApplicationUser> GetUserByUserNameAsync(string userName)
         {
-            return await _session.Query<ApplicationUser>().FirstOrDefaultAsync(u => u.UserName == userName);
+            return await _session.Query<ApplicationUser>()
+                .FirstOrDefaultAsync(u => u.UserName == userName);
         }
 
         public async Task<IEnumerable<ApplicationUser>> GetAllUsersAsync()
@@ -32,7 +38,7 @@ namespace BlogApi.Infrastructure.Data.Repositories
 
         public async Task UpdateUserAsync(ApplicationUser user)
         {
-            await _session.StoreAsync(user); // Added 'await' to ensure the call is awaited
+            await _session.StoreAsync(user);
             await _session.SaveChangesAsync();
         }
 

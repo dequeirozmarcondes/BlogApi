@@ -2,6 +2,7 @@
 using BlogApi.Application.IServices;
 using BlogApi.Core.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
 
 namespace BlogApi.Presentation.Controllers
 {
@@ -67,8 +68,12 @@ namespace BlogApi.Presentation.Controllers
                 Email = userCreateDto.Email ?? string.Empty // Fix for possible null reference
             };
 
-            // Note: Password should be hashed and managed via UserManager for security
-            await _userService.AddUserAsync(user);
+            var result = await _userService.AddUserAsync(user, userCreateDto.Password);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Errors);
+            }
 
             var userDto = new UserListDto
             {
@@ -94,14 +99,23 @@ namespace BlogApi.Presentation.Controllers
                 return BadRequest(ModelState);
             }
 
-            var user = new ApplicationUser
+            var existingUser = await _userService.GetUserByIdAsync(id);
+            if (existingUser == null)
             {
-                Id = userEditDto.Id,
-                UserName = userEditDto.UserName ?? string.Empty, // Fix for possible null reference
-                Email = userEditDto.Email ?? string.Empty // Fix for possible null reference
-            };
+                return NotFound();
+            }
 
-            await _userService.UpdateUserAsync(user);
+            // Atualize apenas os campos necessários
+            existingUser.UserName = userEditDto.UserName ?? existingUser.UserName;
+            existingUser.Email = userEditDto.Email ?? existingUser.Email;
+
+            var result = await _userService.UpdateUserAsync(existingUser);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Errors);
+            }
+
             return NoContent();
         }
 
