@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace BlogApi.Core.Entities
+﻿namespace BlogApi.Core.Entities
 {
     public class Post
     {

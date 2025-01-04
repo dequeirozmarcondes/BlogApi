@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace BlogApi.Core.Entities
+﻿namespace BlogApi.Core.Entities
 {
     public class CommentsPost
     {
