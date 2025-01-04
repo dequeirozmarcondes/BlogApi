@@ -2,7 +2,9 @@
 using BlogApi.Core.IRepository;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Session;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BlogApi.Infrastructure.Data.Repositories
@@ -24,6 +26,11 @@ namespace BlogApi.Infrastructure.Data.Repositories
         public async Task<CommentsPost> GetCommentsPostByIdAsync(string commentsPostId)
         {
             return await _session.LoadAsync<CommentsPost>(commentsPostId);
+        }
+
+        public async Task<IEnumerable<CommentsPost>> GetCommentsPostsByPostIdAsync(string postId)
+        {
+            return await _session.Query<CommentsPost>().Where(cp => cp.PostId == postId).ToListAsync();
         }
 
         public async Task AddCommentsPostAsync(CommentsPost commentsPost)

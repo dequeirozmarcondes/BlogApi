@@ -11,8 +11,8 @@ namespace BlogApi.Core.Entities
         public string UserId { get; set; } = default!;
         public ApplicationUser User { get; set; } = default!;
 
-        public ICollection<CommentsPost> CommentsPosts { get; set; } = new List<CommentsPost>(); // Corrigido para inicializar corretamente como lista
-        public ICollection<LikePost> LikePosts { get; set; } = new List<LikePost>(); // Corrigido para inicializar corretamente como lista
+        public ICollection<CommentsPost> CommentsPosts { get; set; } = new List<CommentsPost>();
+        public ICollection<LikePost> LikePosts { get; set; } = new List<LikePost>();
 
         public Post()
         {

@@ -4,6 +4,7 @@ using BlogApi.Core.IRepository;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BlogApi.Application.Services
@@ -12,12 +13,21 @@ namespace BlogApi.Application.Services
     {
         private readonly IApplicationUserRepository _userRepository;
         private readonly IPostRepository _postRepository;
+        private readonly ILikePostRepository _likePostRepository;
+        private readonly ICommentsPostRepository _commentsPostRepository;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public ApplicationUserService(IApplicationUserRepository userRepository, IPostRepository postRepository, UserManager<ApplicationUser> userManager)
+        public ApplicationUserService(
+            IApplicationUserRepository userRepository,
+            IPostRepository postRepository,
+            ILikePostRepository likePostRepository,
+            ICommentsPostRepository commentsPostRepository,
+            UserManager<ApplicationUser> userManager)
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _postRepository = postRepository ?? throw new ArgumentNullException(nameof(postRepository));
+            _likePostRepository = likePostRepository ?? throw new ArgumentNullException(nameof(likePostRepository));
+            _commentsPostRepository = commentsPostRepository ?? throw new ArgumentNullException(nameof(commentsPostRepository));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         }
 
@@ -26,7 +36,13 @@ namespace BlogApi.Application.Services
             var user = await _userRepository.GetUserByIdAsync(userId);
             if (user != null)
             {
-                user.Posts = (ICollection<Post>)await _postRepository.GetPostsByUserIdAsync(userId);
+                var posts = (await _postRepository.GetPostsByUserIdAsync(userId)).ToList();
+                foreach (var post in posts)
+                {
+                    post.LikePosts = (await _likePostRepository.GetLikePostsByPostIdAsync(post.Id)).ToList();
+                    post.CommentsPosts = (await _commentsPostRepository.GetCommentsPostsByPostIdAsync(post.Id)).ToList();
+                }
+                user.Posts = posts;
             }
             return user;
         }
@@ -36,7 +52,13 @@ namespace BlogApi.Application.Services
             var user = await _userRepository.GetUserByUserNameAsync(userName);
             if (user != null)
             {
-                user.Posts = (ICollection<Post>)await _postRepository.GetPostsByUserIdAsync(user.Id);
+                var posts = (await _postRepository.GetPostsByUserIdAsync(user.Id)).ToList();
+                foreach (var post in posts)
+                {
+                    post.LikePosts = (await _likePostRepository.GetLikePostsByPostIdAsync(post.Id)).ToList();
+                    post.CommentsPosts = (await _commentsPostRepository.GetCommentsPostsByPostIdAsync(post.Id)).ToList();
+                }
+                user.Posts = posts;
             }
             return user;
         }
@@ -46,7 +68,13 @@ namespace BlogApi.Application.Services
             var users = await _userRepository.GetAllUsersAsync();
             foreach (var user in users)
             {
-                user.Posts = (ICollection<Post>)await _postRepository.GetPostsByUserIdAsync(user.Id);
+                var posts = (await _postRepository.GetPostsByUserIdAsync(user.Id)).ToList();
+                foreach (var post in posts)
+                {
+                    post.LikePosts = (await _likePostRepository.GetLikePostsByPostIdAsync(post.Id)).ToList();
+                    post.CommentsPosts = (await _commentsPostRepository.GetCommentsPostsByPostIdAsync(post.Id)).ToList();
+                }
+                user.Posts = posts;
             }
             return users;
         }

@@ -21,7 +21,6 @@ namespace BlogApi.Presentation.Controllers
             var commentsPosts = await _commentsPostService.GetAllCommentsPostsAsync();
             var commentsPostDtos = commentsPosts.Select(cp => new CommentsPostDto
             {
-                Id = cp.Id,
                 PostId = cp.PostId,
                 UserId = cp.UserId,
                 Content = cp.Content,
@@ -43,7 +42,6 @@ namespace BlogApi.Presentation.Controllers
 
             var commentsPostDto = new CommentsPostDto
             {
-                Id = commentsPost.Id,
                 PostId = commentsPost.PostId,
                 UserId = commentsPost.UserId,
                 Content = commentsPost.Content,
@@ -67,18 +65,19 @@ namespace BlogApi.Presentation.Controllers
                 PostId = commentsPostDto.PostId,
                 UserId = commentsPostDto.UserId,
                 Content = commentsPostDto.Content,
-                CreatedAt = commentsPostDto.CreatedAt
+                CreatedAt = DateTime.UtcNow
             };
 
             await _commentsPostService.AddCommentsPostAsync(commentsPost);
+            commentsPostDto.CreatedAt = commentsPost.CreatedAt;
             return CreatedAtAction(nameof(Details), new { id = commentsPost.Id }, commentsPostDto);
         }
 
         // PUT: api/CommentsPost/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> Edit(string id, [FromBody] CommentsPostDto commentsPostDto)
+        public async Task<IActionResult> Edit(string id, [FromBody] UpdatePostDto updatePostDto)
         {
-            if (id != commentsPostDto.Id)
+            if (id != updatePostDto.Id)
             {
                 return BadRequest("The ID in the URL does not match the ID in the body.");
             }
@@ -90,11 +89,10 @@ namespace BlogApi.Presentation.Controllers
 
             var commentsPost = new CommentsPost
             {
-                Id = commentsPostDto.Id,
-                PostId = commentsPostDto.PostId,
-                UserId = commentsPostDto.UserId,
-                Content = commentsPostDto.Content,
-                CreatedAt = commentsPostDto.CreatedAt
+                Id = updatePostDto.Id,
+                PostId = updatePostDto.PostId,
+                UserId = updatePostDto.UserId,
+                Content = updatePostDto.Content,
             };
 
             await _commentsPostService.UpdateCommentsPostAsync(commentsPost);

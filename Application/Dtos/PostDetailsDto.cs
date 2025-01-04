@@ -14,5 +14,7 @@ namespace BlogApi.Application.Dtos
         public required string Content { get; set; }
         [Required]
         public required string UserId { get; set; }
+        public List<LikePostDto> Likes { get; set; } = new();
+        public List<CommentsPostDto> Comments { get; set; } = new();
     }
 }

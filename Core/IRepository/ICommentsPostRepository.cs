@@ -1,6 +1,4 @@
 ﻿using BlogApi.Core.Entities;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace BlogApi.Core.IRepository
 {
@@ -8,6 +6,7 @@ namespace BlogApi.Core.IRepository
     {
         Task<IEnumerable<CommentsPost>> GetAllCommentsPostsAsync();
         Task<CommentsPost> GetCommentsPostByIdAsync(string commentsPostId);
+        Task<IEnumerable<CommentsPost>> GetCommentsPostsByPostIdAsync(string postId);  // Adicionado
         Task AddCommentsPostAsync(CommentsPost commentsPost);
         Task UpdateCommentsPostAsync(CommentsPost commentsPost);
         Task DeleteCommentsPostAsync(string commentsPostId);

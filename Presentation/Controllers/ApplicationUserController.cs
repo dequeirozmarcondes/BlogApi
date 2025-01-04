@@ -2,6 +2,7 @@
 using BlogApi.Application.IServices;
 using BlogApi.Core.Entities;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,8 +28,8 @@ namespace BlogApi.Presentation.Controllers
             var userDtos = users.Select(user => new UserListDto
             {
                 Id = user.Id,
-                UserName = user.UserName ?? string.Empty, // Fix for possible null reference
-                Email = user.Email ?? string.Empty // Fix for possible null reference
+                UserName = user.UserName ?? string.Empty,
+                Email = user.Email ?? string.Empty
             }).ToList();
 
             return Ok(userDtos);
@@ -52,14 +53,27 @@ namespace BlogApi.Presentation.Controllers
             var userDto = new UserDetailsDto
             {
                 Id = user.Id,
-                UserName = user.UserName ?? string.Empty, // Fix for possible null reference
-                Email = user.Email ?? string.Empty, // Fix for possible null reference
+                UserName = user.UserName ?? string.Empty,
+                Email = user.Email ?? string.Empty,
                 Posts = user.Posts.Select(post => new PostListDto
                 {
                     Id = post.Id,
                     Title = post.Title,
                     Content = post.Content,
-                    UserId = post.UserId // Incluindo UserId
+                    UserId = post.UserId,
+                    Likes = post.LikePosts.Select(lp => new LikePostDto
+                    {
+                        UserId = lp.UserId,
+                        PostId = lp.PostId
+                    }).ToList(),
+                    Comments = post.CommentsPosts.Select(cp => new CommentsPostDto
+                    {
+                        Id = cp.Id,
+                        PostId = cp.PostId,
+                        UserId = cp.UserId,
+                        Content = cp.Content,
+                        CreatedAt = cp.CreatedAt
+                    }).ToList()
                 }).ToList()
             };
 
@@ -77,8 +91,8 @@ namespace BlogApi.Presentation.Controllers
 
             var user = new ApplicationUser
             {
-                UserName = userCreateDto.UserName ?? string.Empty, // Fix for possible null reference
-                Email = userCreateDto.Email ?? string.Empty // Fix for possible null reference
+                UserName = userCreateDto.UserName ?? string.Empty,
+                Email = userCreateDto.Email ?? string.Empty
             };
 
             var result = await _userService.AddUserAsync(user, userCreateDto.Password);
@@ -91,8 +105,8 @@ namespace BlogApi.Presentation.Controllers
             var userDto = new UserListDto
             {
                 Id = user.Id,
-                UserName = user.UserName ?? string.Empty, // Fix for possible null reference
-                Email = user.Email ?? string.Empty // Fix for possible null reference
+                UserName = user.UserName ?? string.Empty,
+                Email = user.Email ?? string.Empty
             };
 
             return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, userDto);

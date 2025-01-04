@@ -22,6 +22,7 @@ namespace BlogApi.Application.Services
 
         public async Task AddCommentsPostAsync(CommentsPost commentsPost)
         {
+            commentsPost.CreatedAt = DateTime.UtcNow;
             await _commentsPostRepository.AddCommentsPostAsync(commentsPost);
         }
 
