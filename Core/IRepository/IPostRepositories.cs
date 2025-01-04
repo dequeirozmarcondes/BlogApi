@@ -1,6 +1,4 @@
 ﻿using BlogApi.Core.Entities;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace BlogApi.Core.IRepository
 {
@@ -11,5 +9,6 @@ namespace BlogApi.Core.IRepository
         Task AddPostAsync(Post post);
         Task UpdatePostAsync(Post post);
         Task DeletePostAsync(string id);
+        Task<IEnumerable<Post>> GetPostsByUserIdAsync(string userId);
     }
 }

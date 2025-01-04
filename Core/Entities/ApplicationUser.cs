@@ -11,9 +11,9 @@ namespace BlogApi.Core.Entities
 
         public ApplicationUser()
         {
-            Posts = [];
-            LikePosts = [];
-            CommentsPosts = [];
+            Posts = new List<Post>();
+            LikePosts = new List<LikePost>();
+            CommentsPosts = new List<CommentsPost>();
         }
     }
 }

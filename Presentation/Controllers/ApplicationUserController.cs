@@ -2,15 +2,22 @@
 using BlogApi.Application.IServices;
 using BlogApi.Core.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace BlogApi.Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ApplicationUserController(IApplicationUserService userService) : ControllerBase
+    public class ApplicationUserController : ControllerBase
     {
-        private readonly IApplicationUserService _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+        private readonly IApplicationUserService _userService;
+
+        public ApplicationUserController(IApplicationUserService userService)
+        {
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+        }
 
         // GET: api/ApplicationUser
         [HttpGet]
@@ -31,6 +38,11 @@ namespace BlogApi.Presentation.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDetailsDto>> GetUserById(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID cannot be null or empty.");
+            }
+
             var user = await _userService.GetUserByIdAsync(id);
             if (user == null)
             {
@@ -46,7 +58,8 @@ namespace BlogApi.Presentation.Controllers
                 {
                     Id = post.Id,
                     Title = post.Title,
-                    Content = post.Content
+                    Content = post.Content,
+                    UserId = post.UserId // Incluindo UserId
                 }).ToList()
             };
 

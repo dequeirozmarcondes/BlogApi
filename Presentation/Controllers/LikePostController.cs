@@ -1,7 +1,10 @@
-﻿using BlogApi.Core.Entities;
-using Microsoft.AspNetCore.Mvc;
+﻿using BlogApi.Application.Dtos;
 using BlogApi.Application.IServices;
-using BlogApi.Application.Dtos;
+using BlogApi.Core.Entities;
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace BlogApi.Presentation.Controllers
 {
@@ -56,8 +59,7 @@ namespace BlogApi.Presentation.Controllers
             var likePost = new LikePost
             {
                 UserId = likePostDto.UserId,
-                PostId = likePostDto.PostId,
-                // Add other properties if necessary
+                PostId = likePostDto.PostId
             };
 
             await _likePostService.AddLikePostAsync(likePost);
@@ -81,8 +83,7 @@ namespace BlogApi.Presentation.Controllers
             var likePost = new LikePost
             {
                 UserId = likePostDto.UserId,
-                PostId = likePostDto.PostId,
-                // Add other properties if necessary
+                PostId = likePostDto.PostId
             };
 
             await _likePostService.UpdateLikePostAsync(likePost);

@@ -2,6 +2,9 @@
 using BlogApi.Application.IServices;
 using BlogApi.Core.Entities;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace BlogApi.Presentation.Controllers
 {

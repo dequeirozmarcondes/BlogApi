@@ -2,6 +2,9 @@
 using BlogApi.Core.IRepository;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Session;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BlogApi.Infrastructure.Data.Repositories
 {

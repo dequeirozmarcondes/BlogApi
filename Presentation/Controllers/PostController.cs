@@ -2,14 +2,22 @@
 using Microsoft.AspNetCore.Mvc;
 using BlogApi.Application.IServices;
 using BlogApi.Application.Dtos;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace BlogApi.Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class PostController(IPostService postService) : ControllerBase
+    public class PostController : ControllerBase
     {
-        private readonly IPostService _postService = postService ?? throw new ArgumentNullException(nameof(postService));
+        private readonly IPostService _postService;
+
+        public PostController(IPostService postService)
+        {
+            _postService = postService ?? throw new ArgumentNullException(nameof(postService));
+        }
 
         // GET: api/Post
         [HttpGet]
@@ -20,7 +28,8 @@ namespace BlogApi.Presentation.Controllers
             {
                 Id = post.Id,
                 Title = post.Title,
-                Content = post.Content
+                Content = post.Content,
+                UserId = post.UserId // Incluindo UserId
             }).ToList();
 
             return Ok(postDtos);
@@ -45,7 +54,8 @@ namespace BlogApi.Presentation.Controllers
             {
                 Id = post.Id,
                 Title = post.Title,
-                Content = post.Content
+                Content = post.Content,
+                UserId = post.UserId // Incluindo UserId
             };
 
             return Ok(postDto);
@@ -53,21 +63,23 @@ namespace BlogApi.Presentation.Controllers
 
         // POST: api/Post
         [HttpPost]
-        public async Task<ActionResult<PostCreateDto>> Create([FromBody] PostCreateDto postDto)
+        public async Task<ActionResult<Post>> CreatePost([FromBody] PostCreateDto postCreateDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var post = new Post(
-                Guid.NewGuid().ToString(), // Generate a new ID
-                postDto.Title,
-                postDto.Content
-            );
+            var post = new Post
+            {
+                Title = postCreateDto.Title,
+                Content = postCreateDto.Content,
+                UserId = postCreateDto.UserId
+            };
 
             await _postService.AddPostAsync(post);
-            return CreatedAtAction(nameof(Details), new { id = post.Id }, postDto);
+
+            return CreatedAtAction(nameof(Details), new { id = post.Id }, post);
         }
 
         // PUT: api/Post/{id}
@@ -84,13 +96,16 @@ namespace BlogApi.Presentation.Controllers
                 return BadRequest(ModelState);
             }
 
-            var post = new Post(
-                postDto.Id,
-                postDto.Title,
-                postDto.Content
-            );
+            var existingPost = await _postService.GetPostByIdAsync(id);
+            if (existingPost == null)
+            {
+                return NotFound();
+            }
 
-            await _postService.UpdatePostAsync(post);
+            existingPost.Title = postDto.Title;
+            existingPost.Content = postDto.Content;
+
+            await _postService.UpdatePostAsync(existingPost);
             return NoContent();
         }
 
@@ -100,6 +115,12 @@ namespace BlogApi.Presentation.Controllers
         {
             try
             {
+                var existingPost = await _postService.GetPostByIdAsync(id);
+                if (existingPost == null)
+                {
+                    return NotFound();
+                }
+
                 await _postService.DeletePostAsync(id);
                 return NoContent();
             }

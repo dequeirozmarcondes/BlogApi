@@ -2,37 +2,48 @@
 using BlogApi.Core.IRepository;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Session;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace BlogApi.Infrastructure.Data.Repositories
 {
-    public class PostRepository(IAsyncDocumentSession session) : IPostRepository
+    public class PostRepository : IPostRepository
     {
-        public async Task<IEnumerable<Post>> GetAllPostsAsync()
+        private readonly IAsyncDocumentSession _session;
+
+        public PostRepository(IAsyncDocumentSession session)
         {
-            return await session.Query<Post>().ToListAsync();
+            _session = session ?? throw new ArgumentNullException(nameof(session));
         }
 
-        public async Task<Post> GetPostByIdAsync(string id)
+        public async Task<IEnumerable<Post>> GetAllPostsAsync()
         {
-            return await session.LoadAsync<Post>(id);
+            return await _session.Query<Post>().ToListAsync();
+        }
+
+        public async Task<Post?> GetPostByIdAsync(string id)
+        {
+            return await _session.LoadAsync<Post>(id);
         }
 
         public async Task AddPostAsync(Post post)
         {
-            await session.StoreAsync(post);
-            await session.SaveChangesAsync();
+            await _session.StoreAsync(post);
+            await _session.SaveChangesAsync();
         }
 
         public async Task UpdatePostAsync(Post post)
         {
-            var existingPost = await session.LoadAsync<Post>(post.Id);
+            var existingPost = await _session.LoadAsync<Post>(post.Id);
             if (existingPost != null)
             {
                 existingPost.Title = post.Title;
                 existingPost.Content = post.Content;
                 existingPost.CommentsPosts = post.CommentsPosts;
                 existingPost.LikePosts = post.LikePosts;
-                await session.SaveChangesAsync();
+                await _session.SaveChangesAsync();
             }
         }
 
@@ -41,9 +52,16 @@ namespace BlogApi.Infrastructure.Data.Repositories
             var post = await GetPostByIdAsync(id);
             if (post != null)
             {
-                session.Delete(post);
-                await session.SaveChangesAsync();
+                _session.Delete(post);
+                await _session.SaveChangesAsync();
             }
+        }
+
+        public async Task<IEnumerable<Post>> GetPostsByUserIdAsync(string userId)
+        {
+            return await _session.Query<Post>()
+                .Where(p => p.UserId == userId)
+                .ToListAsync();
         }
     }
 }

@@ -1,17 +1,22 @@
-﻿namespace BlogApi.Core.Entities
+﻿using System.Collections.Generic;
+
+namespace BlogApi.Core.Entities
 {
     public class Post
     {
-        public string Id { get; set; } = string.Empty;
-        public string Title { get; set; } = string.Empty;
-        public string Content { get; set; } = string.Empty;
+        public string Id { get; set; } = default!;
+        public string Title { get; set; } = default!;
+        public string Content { get; set; } = default!;
 
-        public string UserId { get; set; } = string.Empty;
+        public string UserId { get; set; } = default!;
         public ApplicationUser User { get; set; } = default!;
 
-        public ICollection<CommentsPost> CommentsPosts { get; set; }
-        public ICollection<LikePost> LikePosts { get; set; }
-        public string V { get; }
+        public ICollection<CommentsPost> CommentsPosts { get; set; } = new List<CommentsPost>(); // Corrigido para inicializar corretamente como lista
+        public ICollection<LikePost> LikePosts { get; set; } = new List<LikePost>(); // Corrigido para inicializar corretamente como lista
+
+        public Post()
+        {
+        }
 
         public Post(string id, string title, string content, string userId, ApplicationUser user)
         {
@@ -20,21 +25,17 @@
             Content = content;
             UserId = userId;
             User = user;
-            CommentsPosts = [];
-            LikePosts = [];
+            CommentsPosts = new List<CommentsPost>(); // Inicializa a lista
+            LikePosts = new List<LikePost>(); // Inicializa a lista
         }
 
-        public Post()
+        public Post(string id, string title, string content)
         {
-            CommentsPosts = [];
-            LikePosts = [];
-        }
-
-        public Post(string v, string title, string content)
-        {
-            V = v;
+            Id = id;
             Title = title;
             Content = content;
+            CommentsPosts = new List<CommentsPost>(); // Inicializa a lista
+            LikePosts = new List<LikePost>(); // Inicializa a lista
         }
     }
 }

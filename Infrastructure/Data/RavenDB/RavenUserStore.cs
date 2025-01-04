@@ -7,14 +7,9 @@ using Raven.Client.Documents;
 
 namespace BlogApi.Infrastructure.Data.RavenDB
 {
-    public class RavenUserStore : IUserStore<ApplicationUser>, IUserPasswordStore<ApplicationUser>
+    public class RavenUserStore(IAsyncDocumentSession session) : IUserStore<ApplicationUser>, IUserPasswordStore<ApplicationUser>
     {
-        private readonly IAsyncDocumentSession _session;
-
-        public RavenUserStore(IAsyncDocumentSession session)
-        {
-            _session = session ?? throw new ArgumentNullException(nameof(session));
-        }
+        private readonly IAsyncDocumentSession _session = session ?? throw new ArgumentNullException(nameof(session));
 
         public async Task<IdentityResult> CreateAsync(ApplicationUser user, CancellationToken cancellationToken)
         {
@@ -43,7 +38,7 @@ namespace BlogApi.Infrastructure.Data.RavenDB
             return await _session.LoadAsync<ApplicationUser>(userId, cancellationToken);
         }
 
-        public async Task<ApplicationUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
+        public async Task<ApplicationUser?> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
