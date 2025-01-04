@@ -21,7 +21,7 @@ namespace BlogApi.Application.Services
             return await _commentsPostRepository.GetAllCommentsPostsAsync();
         }
 
-        public async Task<CommentsPost> GetCommentsPostByIdAsync(string commentsPostId)
+        public async Task<CommentsPost?> GetCommentsPostByIdAsync(string commentsPostId)
         {
             return await _commentsPostRepository.GetCommentsPostByIdAsync(commentsPostId);
         }

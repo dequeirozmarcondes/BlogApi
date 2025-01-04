@@ -2,12 +2,20 @@
 using BlogApi.Core.IRepository;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Session;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BlogApi.Infrastructure.Data.Repositories
 {
-    public class ApplicationUserRepository(IAsyncDocumentSession session) : IApplicationUserRepository
+    public class ApplicationUserRepository : IApplicationUserRepository
     {
-        private readonly IAsyncDocumentSession _session = session ?? throw new ArgumentNullException(nameof(session));
+        private readonly IAsyncDocumentSession _session;
+
+        public ApplicationUserRepository(IAsyncDocumentSession session)
+        {
+            _session = session ?? throw new ArgumentNullException(nameof(session));
+        }
 
         public async Task<ApplicationUser?> GetUserByIdAsync(string userId)
         {

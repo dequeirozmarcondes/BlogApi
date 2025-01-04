@@ -2,10 +2,6 @@
 using BlogApi.Application.IServices;
 using BlogApi.Core.Entities;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Web;
 
 namespace BlogApi.Presentation.Controllers
@@ -54,12 +50,15 @@ namespace BlogApi.Presentation.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<PostDetailsDto>> Details(string id)
         {
-            if (string.IsNullOrEmpty(id))
+            // Decode the ID to handle special characters
+            string decodedId = HttpUtility.UrlDecode(id);
+
+            if (string.IsNullOrEmpty(decodedId))
             {
                 return BadRequest("ID cannot be null or empty.");
             }
 
-            var post = await _postService.GetPostByIdAsync(id);
+            var post = await _postService.GetPostByIdAsync(decodedId);
             if (post == null)
             {
                 return NotFound();
@@ -100,9 +99,17 @@ namespace BlogApi.Presentation.Controllers
 
             var post = new Post
             {
+                Id = Guid.NewGuid().ToString(),
                 Title = postCreateDto.Title,
                 Content = postCreateDto.Content,
-                UserId = postCreateDto.UserId
+                Published = postCreateDto.Published,
+                PublishedAt = DateTime.UtcNow,
+                UserId = postCreateDto.UserId,
+                User = new ApplicationUser
+                {
+                    Id = postCreateDto.UserId,
+                    Bio = string.Empty // Assuming a default value for Bio
+                }
             };
 
             await _postService.AddPostAsync(post);

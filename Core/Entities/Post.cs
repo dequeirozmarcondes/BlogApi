@@ -11,8 +11,8 @@
         public required string UserId { get; set; }
         public required ApplicationUser User { get; set; }
 
-        public ICollection<CommentsPost> CommentsPosts { get; set; } = new List<CommentsPost>();
-        public ICollection<LikePost> LikePosts { get; set; } = new List<LikePost>();
+        public ICollection<CommentsPost> CommentsPosts { get; set; } = [];
+        public ICollection<LikePost> LikePosts { get; set; } = [];
 
         // Construtor padrão
         public Post()
@@ -29,8 +29,8 @@
             PublishedAt = publishedAt;
             UserId = userId;
             User = user;
-            CommentsPosts = new List<CommentsPost>();
-            LikePosts = new List<LikePost>();
+            CommentsPosts = [];
+            LikePosts = [];
         }
 
         // Construtor sem atributos Published e PublishedAt
@@ -43,8 +43,8 @@
             PublishedAt = DateTime.MinValue; // Valor padrão para PublishedAt
             UserId = userId;
             User = user;
-            CommentsPosts = new List<CommentsPost>();
-            LikePosts = new List<LikePost>();
+            CommentsPosts = [];
+            LikePosts = [];
         }
 
         // Construtor mínimo para inicialização básica
@@ -55,8 +55,8 @@
             Content = content;
             Published = false; // Valor padrão para Published
             PublishedAt = DateTime.MinValue; // Valor padrão para PublishedAt
-            CommentsPosts = new List<CommentsPost>();
-            LikePosts = new List<LikePost>();
+            CommentsPosts = [];
+            LikePosts = [];
         }
     }
 }

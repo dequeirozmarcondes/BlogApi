@@ -13,5 +13,9 @@ namespace BlogApi.Application.Dtos
 
         [Required]
         public required string UserId { get; set; }
+
+        [Required]
+        public required bool Published { get; set; }
+
     }
 }

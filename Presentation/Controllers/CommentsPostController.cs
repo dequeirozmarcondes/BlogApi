@@ -2,6 +2,7 @@
 using BlogApi.Application.IServices;
 using BlogApi.Core.Entities;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -69,10 +70,22 @@ namespace BlogApi.Presentation.Controllers
 
             var commentsPost = new CommentsPost
             {
+                Id = Guid.NewGuid().ToString(),
                 PostId = commentsPostDto.PostId,
                 UserId = commentsPostDto.UserId,
                 Content = commentsPostDto.Content,
-                CreatedAt = DateTime.UtcNow // Adicionando a data de criação
+                CreatedAt = DateTime.UtcNow,
+                Post = new Post
+                {
+                    Id = commentsPostDto.PostId,
+                    Title = "Default Title", // Placeholder value
+                    Content = "Default Content", // Placeholder value
+                    Published = false, // Placeholder value
+                    PublishedAt = DateTime.UtcNow, // Placeholder value
+                    UserId = commentsPostDto.UserId,
+                    User = new ApplicationUser { Id = commentsPostDto.UserId, Bio = "Default Bio" } // Placeholder value
+                },
+                User = new ApplicationUser { Id = commentsPostDto.UserId, Bio = "Default Bio" } // Placeholder value
             };
 
             await _commentsPostService.AddCommentsPostAsync(commentsPost);
@@ -99,6 +112,17 @@ namespace BlogApi.Presentation.Controllers
                 PostId = updatePostDto.PostId,
                 UserId = updatePostDto.UserId,
                 Content = updatePostDto.Content,
+                Post = new Post
+                {
+                    Id = updatePostDto.PostId,
+                    Title = "Default Title", // Placeholder value
+                    Content = "Default Content", // Placeholder value
+                    Published = false, // Placeholder value
+                    PublishedAt = DateTime.UtcNow, // Placeholder value
+                    UserId = updatePostDto.UserId,
+                    User = new ApplicationUser { Id = updatePostDto.UserId, Bio = "Default Bio" } // Placeholder value
+                },
+                User = new ApplicationUser { Id = updatePostDto.UserId, Bio = "Default Bio" } // Placeholder value
             };
 
             await _commentsPostService.UpdateCommentsPostAsync(commentsPost);

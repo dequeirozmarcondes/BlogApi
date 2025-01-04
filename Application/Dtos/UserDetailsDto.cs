@@ -10,7 +10,7 @@ namespace BlogApi.Application.Dtos
 
         [EmailAddress]
         public string? Email { get; set; }
-
+        public string? Bio { get; set; }
         public IEnumerable<PostListDto>? Posts { get; set; }
     }
 }

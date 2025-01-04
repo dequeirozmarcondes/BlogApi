@@ -31,7 +31,7 @@ namespace BlogApi.Application.Services
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         }
 
-        public async Task<ApplicationUser> GetUserByIdAsync(string userId)
+        public async Task<ApplicationUser?> GetUserByIdAsync(string userId)
         {
             var user = await _userRepository.GetUserByIdAsync(userId);
             if (user != null)
@@ -100,6 +100,7 @@ namespace BlogApi.Application.Services
             // Atualiza apenas os campos fornecidos, preservando as propriedades existentes
             existingUser.UserName = user.UserName ?? existingUser.UserName;
             existingUser.Email = user.Email ?? existingUser.Email;
+            existingUser.Bio = user.Bio ?? existingUser.Bio;
 
             var result = await _userManager.UpdateAsync(existingUser);
             if (result.Succeeded)

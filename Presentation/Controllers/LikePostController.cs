@@ -2,6 +2,7 @@
 using BlogApi.Application.IServices;
 using BlogApi.Core.Entities;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,9 +12,14 @@ namespace BlogApi.Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class LikePostController(ILikePostService likePostService) : ControllerBase
+    public class LikePostController : ControllerBase
     {
-        private readonly ILikePostService _likePostService = likePostService ?? throw new ArgumentNullException(nameof(likePostService));
+        private readonly ILikePostService _likePostService;
+
+        public LikePostController(ILikePostService likePostService)
+        {
+            _likePostService = likePostService ?? throw new ArgumentNullException(nameof(likePostService));
+        }
 
         // GET: api/LikePost
         [HttpGet]
@@ -33,9 +39,10 @@ namespace BlogApi.Presentation.Controllers
         [HttpGet("{userId}/{postId}")]
         public async Task<ActionResult<LikePostDto>> Details(string userId, string postId)
         {
-            string decodedUserId = HttpUtility.UrlDecode(postId);
+            string decodedUserId = HttpUtility.UrlDecode(userId);
+            string decodedPostId = HttpUtility.UrlDecode(postId);
 
-            var likePost = await _likePostService.GetLikePostByIdAsync(userId, decodedUserId);
+            var likePost = await _likePostService.GetLikePostByIdAsync(decodedUserId, decodedPostId);
             if (likePost == null)
             {
                 return NotFound();
@@ -62,7 +69,9 @@ namespace BlogApi.Presentation.Controllers
             var likePost = new LikePost
             {
                 UserId = likePostDto.UserId,
-                PostId = likePostDto.PostId
+                PostId = likePostDto.PostId,
+                User = new ApplicationUser { Id = likePostDto.UserId, Bio = "Default Bio" }, // Placeholder values
+                Post = new Post { Id = likePostDto.PostId, Title = "Default Title", Content = "Default Content", Published = false, PublishedAt = DateTime.UtcNow, UserId = likePostDto.UserId, User = new ApplicationUser { Id = likePostDto.UserId, Bio = "Default Bio" } } // Placeholder values
             };
 
             await _likePostService.AddLikePostAsync(likePost);
@@ -86,7 +95,9 @@ namespace BlogApi.Presentation.Controllers
             var likePost = new LikePost
             {
                 UserId = likePostDto.UserId,
-                PostId = likePostDto.PostId
+                PostId = likePostDto.PostId,
+                User = new ApplicationUser { Id = likePostDto.UserId, Bio = "Default Bio" }, // Placeholder values
+                Post = new Post { Id = likePostDto.PostId, Title = "Default Title", Content = "Default Content", Published = false, PublishedAt = DateTime.UtcNow, UserId = likePostDto.UserId, User = new ApplicationUser { Id = likePostDto.UserId, Bio = "Default Bio" } } // Placeholder values
             };
 
             await _likePostService.UpdateLikePostAsync(likePost);

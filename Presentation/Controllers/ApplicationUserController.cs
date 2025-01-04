@@ -2,10 +2,6 @@
 using BlogApi.Application.IServices;
 using BlogApi.Core.Entities;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace BlogApi.Presentation.Controllers
 {
@@ -29,7 +25,8 @@ namespace BlogApi.Presentation.Controllers
             {
                 Id = user.Id,
                 UserName = user.UserName ?? string.Empty,
-                Email = user.Email ?? string.Empty
+                Email = user.Email ?? string.Empty,
+                Bio = user.Bio
             }).ToList();
 
             return Ok(userDtos);
@@ -55,6 +52,7 @@ namespace BlogApi.Presentation.Controllers
                 Id = user.Id,
                 UserName = user.UserName ?? string.Empty,
                 Email = user.Email ?? string.Empty,
+                Bio = user.Bio,
                 Posts = user.Posts.Select(post => new PostListDto
                 {
                     Id = post.Id,
@@ -92,7 +90,8 @@ namespace BlogApi.Presentation.Controllers
             var user = new ApplicationUser
             {
                 UserName = userCreateDto.UserName ?? string.Empty,
-                Email = userCreateDto.Email ?? string.Empty
+                Email = userCreateDto.Email ?? string.Empty,
+                Bio = userCreateDto.Bio ?? string.Empty // Adicionando o campo Bio requerido
             };
 
             var result = await _userService.AddUserAsync(user, userCreateDto.Password);
@@ -106,7 +105,8 @@ namespace BlogApi.Presentation.Controllers
             {
                 Id = user.Id,
                 UserName = user.UserName ?? string.Empty,
-                Email = user.Email ?? string.Empty
+                Email = user.Email ?? string.Empty,
+                Bio = user.Bio
             };
 
             return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, userDto);
@@ -135,6 +135,7 @@ namespace BlogApi.Presentation.Controllers
             // Atualize apenas os campos necessários
             existingUser.UserName = userEditDto.UserName ?? existingUser.UserName;
             existingUser.Email = userEditDto.Email ?? existingUser.Email;
+            existingUser.Bio = userEditDto.Bio ?? existingUser.Bio;
 
             var result = await _userService.UpdateUserAsync(existingUser);
 

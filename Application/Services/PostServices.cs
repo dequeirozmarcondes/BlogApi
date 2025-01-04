@@ -1,10 +1,6 @@
 ﻿using BlogApi.Application.IServices;
 using BlogApi.Core.Entities;
 using BlogApi.Core.IRepository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Web;
 
 namespace BlogApi.Application.Services
@@ -31,8 +27,8 @@ namespace BlogApi.Application.Services
             var posts = await _postRepository.GetAllPostsAsync();
             foreach (var post in posts)
             {
-                post.LikePosts = (await _likePostRepository.GetLikePostsByPostIdAsync(post.Id)).ToList();
-                post.CommentsPosts = (await _commentsPostRepository.GetCommentsPostsByPostIdAsync(post.Id)).ToList();
+                post.LikePosts = (await _likePostRepository.GetLikePostsByPostIdAsync(post.Id))?.ToList() ?? [];
+                post.CommentsPosts = (await _commentsPostRepository.GetCommentsPostsByPostIdAsync(post.Id))?.ToList() ?? [];
             }
             return posts;
         }
@@ -43,10 +39,11 @@ namespace BlogApi.Application.Services
             // Converter o ID recebido para o formato esperado pelo RavenDB
             string decodedId = HttpUtility.UrlDecode(id);
             var post = await _postRepository.GetPostByIdAsync(decodedId);
+
             if (post != null)
             {
-                post.LikePosts = (await _likePostRepository.GetLikePostsByPostIdAsync(post.Id)).ToList();
-                post.CommentsPosts = (await _commentsPostRepository.GetCommentsPostsByPostIdAsync(post.Id)).ToList();
+                post.LikePosts = (await _likePostRepository.GetLikePostsByPostIdAsync(post.Id))?.ToList() ?? [];
+                post.CommentsPosts = (await _commentsPostRepository.GetCommentsPostsByPostIdAsync(post.Id))?.ToList() ?? [];
             }
             return post;
         }
@@ -54,18 +51,25 @@ namespace BlogApi.Application.Services
         // Adiciona um novo post
         public async Task AddPostAsync(Post post)
         {
+            ArgumentNullException.ThrowIfNull(post);
+
             await _postRepository.AddPostAsync(post);
         }
 
         // Atualiza um post existente
         public async Task UpdatePostAsync(Post post)
         {
+            ArgumentNullException.ThrowIfNull(post);
+
             await _postRepository.UpdatePostAsync(post);
         }
 
         // Deleta um post pelo ID
         public async Task DeletePostAsync(string id)
         {
+            if (string.IsNullOrEmpty(id))
+                throw new ArgumentNullException(nameof(id));
+
             string decodedId = HttpUtility.UrlDecode(id);
             await _postRepository.DeletePostAsync(decodedId);
         }
