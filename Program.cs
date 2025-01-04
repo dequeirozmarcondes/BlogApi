@@ -1,4 +1,3 @@
-using BlogApi.Services;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Session;
 using System.Security.Cryptography.X509Certificates;
@@ -6,8 +5,10 @@ using System.Security.Cryptography;
 using BlogApi.Core.IRepository;
 using BlogApi.Core.Entities;
 using Microsoft.AspNetCore.Identity;
-using BlogApi.IServices;
-using BlogApi.Data.Repositories;
+using BlogApi.Infrastructure.Data.Repositories;
+using BlogApi.Application.IServices;
+using BlogApi.Application.Services;
+using BlogApi.Infrastructure.Data.RavenDB;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,19 +34,19 @@ static X509Certificate2 LoadCertificate(string path)
 builder.Services.AddSingleton<IDocumentStore>(provider =>
 {
     var configuration = provider.GetRequiredService<IConfiguration>();
-    var certificatePath = configuration["RavenDB:CertificatePath"];
+    var path = configuration["RavenDB:CertificatePath"];
 
-    if (string.IsNullOrEmpty(certificatePath))
+    if (string.IsNullOrEmpty(path))
     {
-        throw new ArgumentNullException(nameof(certificatePath), "O caminho do certificado não pode ser nulo ou vazio.");
+        throw new ArgumentNullException(nameof(path), "O caminho do certificado não pode ser nulo ou vazio.");
     }
 
     // Carrega o certificado usando o método auxiliar
-    var certificate = LoadCertificate(certificatePath);
+    X509Certificate2 certificate = LoadCertificate(path);
 
     var store = new DocumentStore
     {
-        Urls = new[] { "https://a.dequeirozmarcondes.ravendb.community" },
+        Urls = ["https://a.dequeirozmarcondes.ravendb.community"],
         Database = "Blog",
         Certificate = certificate
     };
