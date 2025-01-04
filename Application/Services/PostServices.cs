@@ -1,7 +1,9 @@
 ﻿using BlogApi.Application.IServices;
 using BlogApi.Core.Entities;
 using BlogApi.Core.IRepository;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -10,25 +12,43 @@ namespace BlogApi.Application.Services
     public class PostService : IPostService
     {
         private readonly IPostRepository _postRepository;
+        private readonly ILikePostRepository _likePostRepository;
+        private readonly ICommentsPostRepository _commentsPostRepository;
 
-        public PostService(IPostRepository postRepository)
+        public PostService(
+            IPostRepository postRepository,
+            ILikePostRepository likePostRepository,
+            ICommentsPostRepository commentsPostRepository)
         {
             _postRepository = postRepository ?? throw new ArgumentNullException(nameof(postRepository));
+            _likePostRepository = likePostRepository ?? throw new ArgumentNullException(nameof(likePostRepository));
+            _commentsPostRepository = commentsPostRepository ?? throw new ArgumentNullException(nameof(commentsPostRepository));
         }
 
         // Retorna todos os posts
         public async Task<IEnumerable<Post>> GetAllPostsAsync()
         {
-            return await _postRepository.GetAllPostsAsync();
+            var posts = await _postRepository.GetAllPostsAsync();
+            foreach (var post in posts)
+            {
+                post.LikePosts = (await _likePostRepository.GetLikePostsByPostIdAsync(post.Id)).ToList();
+                post.CommentsPosts = (await _commentsPostRepository.GetCommentsPostsByPostIdAsync(post.Id)).ToList();
+            }
+            return posts;
         }
 
         // Retorna um post específico pelo ID
-        public async Task<Post> GetPostByIdAsync(string id)
+        public async Task<Post?> GetPostByIdAsync(string id)
         {
             // Converter o ID recebido para o formato esperado pelo RavenDB
             string decodedId = HttpUtility.UrlDecode(id);
-            Console.WriteLine(decodedId);
-            return await _postRepository.GetPostByIdAsync(decodedId);
+            var post = await _postRepository.GetPostByIdAsync(decodedId);
+            if (post != null)
+            {
+                post.LikePosts = (await _likePostRepository.GetLikePostsByPostIdAsync(post.Id)).ToList();
+                post.CommentsPosts = (await _commentsPostRepository.GetCommentsPostsByPostIdAsync(post.Id)).ToList();
+            }
+            return post;
         }
 
         // Adiciona um novo post

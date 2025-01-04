@@ -1,7 +1,7 @@
-﻿using BlogApi.Core.Entities;
-using Microsoft.AspNetCore.Mvc;
+﻿using BlogApi.Application.Dtos;
 using BlogApi.Application.IServices;
-using BlogApi.Application.Dtos;
+using BlogApi.Core.Entities;
+using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -29,7 +29,20 @@ namespace BlogApi.Presentation.Controllers
                 Id = post.Id,
                 Title = post.Title,
                 Content = post.Content,
-                UserId = post.UserId // Incluindo UserId
+                UserId = post.UserId,
+                Likes = post.LikePosts.Select(lp => new LikePostDto
+                {
+                    UserId = lp.UserId,
+                    PostId = lp.PostId
+                }).ToList(),
+                Comments = post.CommentsPosts.Select(cp => new CommentsPostDto
+                {
+                    Id = cp.Id,
+                    PostId = cp.PostId,
+                    UserId = cp.UserId,
+                    Content = cp.Content,
+                    CreatedAt = cp.CreatedAt
+                }).ToList()
             }).ToList();
 
             return Ok(postDtos);
@@ -55,7 +68,20 @@ namespace BlogApi.Presentation.Controllers
                 Id = post.Id,
                 Title = post.Title,
                 Content = post.Content,
-                UserId = post.UserId // Incluindo UserId
+                UserId = post.UserId,
+                Likes = post.LikePosts.Select(lp => new LikePostDto
+                {
+                    UserId = lp.UserId,
+                    PostId = lp.PostId
+                }).ToList(),
+                Comments = post.CommentsPosts.Select(cp => new CommentsPostDto
+                {
+                    Id = cp.Id,
+                    PostId = cp.PostId,
+                    UserId = cp.UserId,
+                    Content = cp.Content,
+                    CreatedAt = cp.CreatedAt
+                }).ToList()
             };
 
             return Ok(postDto);
