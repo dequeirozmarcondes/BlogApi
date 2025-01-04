@@ -1,4 +1,5 @@
-﻿using BlogApi.Core.Entities;
+﻿using BlogApi.Application.Dtos;
+using BlogApi.Core.Entities;
 
 namespace BlogApi.Application.IServices
 {

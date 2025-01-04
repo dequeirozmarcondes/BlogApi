@@ -2,9 +2,11 @@
 using BlogApi.Application.IServices;
 using BlogApi.Core.Entities;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace BlogApi.Presentation.Controllers
 {
@@ -35,7 +37,7 @@ namespace BlogApi.Presentation.Controllers
                     UserId = lp.UserId,
                     PostId = lp.PostId
                 }).ToList(),
-                Comments = post.CommentsPosts.Select(cp => new CommentsPostDto
+                Comments = post.CommentsPosts.Select(cp => new CommentsGetAllDto
                 {
                     Id = cp.Id,
                     PostId = cp.PostId,
@@ -74,7 +76,7 @@ namespace BlogApi.Presentation.Controllers
                     UserId = lp.UserId,
                     PostId = lp.PostId
                 }).ToList(),
-                Comments = post.CommentsPosts.Select(cp => new CommentsPostDto
+                Comments = post.CommentsPosts.Select(cp => new CommentsGetAllDto
                 {
                     Id = cp.Id,
                     PostId = cp.PostId,
@@ -112,7 +114,10 @@ namespace BlogApi.Presentation.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Edit(string id, [FromBody] PostEditDto postDto)
         {
-            if (id != postDto.Id)
+            // Decode the ID to handle special characters
+            string decodedId = HttpUtility.UrlDecode(id);
+
+            if (decodedId != postDto.Id)
             {
                 return BadRequest("The provided ID does not match the ID in the body.");
             }
@@ -122,7 +127,7 @@ namespace BlogApi.Presentation.Controllers
                 return BadRequest(ModelState);
             }
 
-            var existingPost = await _postService.GetPostByIdAsync(id);
+            var existingPost = await _postService.GetPostByIdAsync(decodedId);
             if (existingPost == null)
             {
                 return NotFound();

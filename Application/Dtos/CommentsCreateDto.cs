@@ -3,9 +3,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BlogApi.Application.Dtos
 {
-    public class CommentsPostDto
+    public class CommentsCreateDto
     {
-        public string? Id { get; set; }
         [Required]
         public required string PostId { get; set; }
 
@@ -14,7 +13,5 @@ namespace BlogApi.Application.Dtos
 
         [Required]
         public required string Content { get; set; }
-        [Required]
-        public required DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

@@ -1,14 +1,20 @@
 ﻿using BlogApi.Application.IServices;
 using BlogApi.Core.Entities;
 using BlogApi.Core.IRepository;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace BlogApi.Application.Services
 {
-    public class CommentsPostService(ICommentsPostRepository commentsPostRepository) : ICommentsPostService
+    public class CommentsPostService : ICommentsPostService
     {
-        private readonly ICommentsPostRepository _commentsPostRepository = commentsPostRepository ?? throw new ArgumentNullException(nameof(commentsPostRepository));
+        private readonly ICommentsPostRepository _commentsPostRepository;
+
+        public CommentsPostService(ICommentsPostRepository commentsPostRepository)
+        {
+            _commentsPostRepository = commentsPostRepository ?? throw new ArgumentNullException(nameof(commentsPostRepository));
+        }
 
         public async Task<IEnumerable<CommentsPost>> GetAllCommentsPostsAsync()
         {

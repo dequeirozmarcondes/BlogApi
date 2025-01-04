@@ -12,9 +12,12 @@ namespace BlogApi.Application.Dtos
 
         [Required]
         public required string Content { get; set; }
+
         [Required]
         public required string UserId { get; set; }
+
         public List<LikePostDto> Likes { get; set; } = new();
-        public List<CommentsPostDto> Comments { get; set; } = new();
+
+        public List<CommentsGetAllDto> Comments { get; set; } = new();
     }
 }

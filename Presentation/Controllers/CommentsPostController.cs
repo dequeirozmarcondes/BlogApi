@@ -10,17 +10,23 @@ namespace BlogApi.Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CommentsPostController(ICommentsPostService commentsPostService) : ControllerBase
+    public class CommentsPostController : ControllerBase
     {
-        private readonly ICommentsPostService _commentsPostService = commentsPostService ?? throw new ArgumentNullException(nameof(commentsPostService));
+        private readonly ICommentsPostService _commentsPostService;
+
+        public CommentsPostController(ICommentsPostService commentsPostService)
+        {
+            _commentsPostService = commentsPostService ?? throw new ArgumentNullException(nameof(commentsPostService));
+        }
 
         // GET: api/CommentsPost
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CommentsPostDto>>> Index()
+        public async Task<ActionResult<IEnumerable<CommentsGetAllDto>>> Index()
         {
             var commentsPosts = await _commentsPostService.GetAllCommentsPostsAsync();
-            var commentsPostDtos = commentsPosts.Select(cp => new CommentsPostDto
+            var commentsPostDtos = commentsPosts.Select(cp => new CommentsGetAllDto
             {
+                Id = cp.Id,
                 PostId = cp.PostId,
                 UserId = cp.UserId,
                 Content = cp.Content,
@@ -32,7 +38,7 @@ namespace BlogApi.Presentation.Controllers
 
         // GET: api/CommentsPost/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<CommentsPostDto>> Details(string id)
+        public async Task<ActionResult<CommentsGetAllDto>> Details(string id)
         {
             var commentsPost = await _commentsPostService.GetCommentsPostByIdAsync(id);
             if (commentsPost == null)
@@ -40,8 +46,9 @@ namespace BlogApi.Presentation.Controllers
                 return NotFound();
             }
 
-            var commentsPostDto = new CommentsPostDto
+            var commentsPostDto = new CommentsGetAllDto
             {
+                Id = commentsPost.Id,
                 PostId = commentsPost.PostId,
                 UserId = commentsPost.UserId,
                 Content = commentsPost.Content,
@@ -53,7 +60,7 @@ namespace BlogApi.Presentation.Controllers
 
         // POST: api/CommentsPost
         [HttpPost]
-        public async Task<ActionResult<CommentsPostDto>> Create([FromBody] CommentsPostDto commentsPostDto)
+        public async Task<ActionResult<CommentsPost>> Create([FromBody] CommentsCreateDto commentsPostDto)
         {
             if (!ModelState.IsValid)
             {
@@ -65,12 +72,11 @@ namespace BlogApi.Presentation.Controllers
                 PostId = commentsPostDto.PostId,
                 UserId = commentsPostDto.UserId,
                 Content = commentsPostDto.Content,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow // Adicionando a data de criação
             };
 
             await _commentsPostService.AddCommentsPostAsync(commentsPost);
-            commentsPostDto.CreatedAt = commentsPost.CreatedAt;
-            return CreatedAtAction(nameof(Details), new { id = commentsPost.Id }, commentsPostDto);
+            return CreatedAtAction(nameof(Details), new { id = commentsPost.Id }, commentsPost);
         }
 
         // PUT: api/CommentsPost/{id}

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace BlogApi.Presentation.Controllers
 {
@@ -32,7 +33,9 @@ namespace BlogApi.Presentation.Controllers
         [HttpGet("{userId}/{postId}")]
         public async Task<ActionResult<LikePostDto>> Details(string userId, string postId)
         {
-            var likePost = await _likePostService.GetLikePostByIdAsync(userId, postId);
+            string decodedUserId = HttpUtility.UrlDecode(postId);
+
+            var likePost = await _likePostService.GetLikePostByIdAsync(userId, decodedUserId);
             if (likePost == null)
             {
                 return NotFound();

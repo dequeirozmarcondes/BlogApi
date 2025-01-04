@@ -66,7 +66,7 @@ namespace BlogApi.Presentation.Controllers
                         UserId = lp.UserId,
                         PostId = lp.PostId
                     }).ToList(),
-                    Comments = post.CommentsPosts.Select(cp => new CommentsPostDto
+                    Comments = post.CommentsPosts.Select(cp => new CommentsGetAllDto
                     {
                         Id = cp.Id,
                         PostId = cp.PostId,
