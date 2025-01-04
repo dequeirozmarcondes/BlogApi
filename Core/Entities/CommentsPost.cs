@@ -4,18 +4,19 @@ namespace BlogApi.Core.Entities
 {
     public class CommentsPost
     {
-        public string Id { get; set; } = string.Empty;
-        public string PostId { get; set; } = string.Empty;
-        public Post Post { get; set; } = null!; // Usando o operador null-forgiving
-        public string UserId { get; set; } = string.Empty;
-        public ApplicationUser User { get; set; } = null!; // Usando o operador null-forgiving
-        public string Content { get; set; } = string.Empty;
+        public required string Id { get; set; }
+        public required string PostId { get; set; }
+        public required Post Post { get; set; }
+        public required string UserId { get; set; }
+        public required ApplicationUser User { get; set; }
+        public required string Content { get; set; }
         public DateTime CreatedAt { get; set; }
 
-        public CommentsPost(string id, string postId, string userId, ApplicationUser user, string content, DateTime createdAt)
+        public CommentsPost(string id, string postId, Post post, string userId, ApplicationUser user, string content, DateTime createdAt)
         {
             Id = id;
             PostId = postId;
+            Post = post;
             UserId = userId;
             User = user;
             Content = content;
