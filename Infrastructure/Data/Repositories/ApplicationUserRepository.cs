@@ -2,27 +2,19 @@
 using BlogApi.Core.IRepository;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Session;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace BlogApi.Infrastructure.Data.Repositories
 {
-    public class ApplicationUserRepository : IApplicationUserRepository
+    public class ApplicationUserRepository(IAsyncDocumentSession session) : IApplicationUserRepository
     {
-        private readonly IAsyncDocumentSession _session;
+        private readonly IAsyncDocumentSession _session = session ?? throw new ArgumentNullException(nameof(session));
 
-        public ApplicationUserRepository(IAsyncDocumentSession session)
-        {
-            _session = session ?? throw new ArgumentNullException(nameof(session));
-        }
-
-        public async Task<ApplicationUser> GetUserByIdAsync(string userId)
+        public async Task<ApplicationUser?> GetUserByIdAsync(string userId)
         {
             return await _session.LoadAsync<ApplicationUser>(userId);
         }
 
-        public async Task<ApplicationUser> GetUserByUserNameAsync(string userName)
+        public async Task<ApplicationUser?> GetUserByUserNameAsync(string userName)
         {
             return await _session.Query<ApplicationUser>()
                 .FirstOrDefaultAsync(u => u.UserName == userName);
@@ -41,8 +33,17 @@ namespace BlogApi.Infrastructure.Data.Repositories
 
         public async Task UpdateUserAsync(ApplicationUser user)
         {
-            await _session.StoreAsync(user);
-            await _session.SaveChangesAsync();
+            var existingUser = await GetUserByIdAsync(user.Id);
+            if (existingUser != null)
+            {
+                existingUser.UserName = user.UserName;
+                existingUser.Email = user.Email;
+                existingUser.Bio = user.Bio;
+                existingUser.Posts = user.Posts;
+                existingUser.LikePosts = user.LikePosts;
+                existingUser.CommentsPosts = user.CommentsPosts;
+                await _session.SaveChangesAsync();
+            }
         }
 
         public async Task DeleteUserAsync(string userId)

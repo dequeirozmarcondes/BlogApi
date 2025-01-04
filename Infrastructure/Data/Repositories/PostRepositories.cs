@@ -2,21 +2,12 @@
 using BlogApi.Core.IRepository;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Session;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace BlogApi.Infrastructure.Data.Repositories
 {
-    public class PostRepository : IPostRepository
+    public class PostRepository(IAsyncDocumentSession session) : IPostRepository
     {
-        private readonly IAsyncDocumentSession _session;
-
-        public PostRepository(IAsyncDocumentSession session)
-        {
-            _session = session ?? throw new ArgumentNullException(nameof(session));
-        }
+        private readonly IAsyncDocumentSession _session = session ?? throw new ArgumentNullException(nameof(session));
 
         public async Task<IEnumerable<Post>> GetAllPostsAsync()
         {
@@ -36,11 +27,13 @@ namespace BlogApi.Infrastructure.Data.Repositories
 
         public async Task UpdatePostAsync(Post post)
         {
-            var existingPost = await _session.LoadAsync<Post>(post.Id);
+            var existingPost = await GetPostByIdAsync(post.Id);
             if (existingPost != null)
             {
                 existingPost.Title = post.Title;
                 existingPost.Content = post.Content;
+                existingPost.Published = post.Published;
+                existingPost.PublishedAt = post.PublishedAt;
                 existingPost.CommentsPosts = post.CommentsPosts;
                 existingPost.LikePosts = post.LikePosts;
                 await _session.SaveChangesAsync();

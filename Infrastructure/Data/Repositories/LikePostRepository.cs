@@ -2,28 +2,19 @@
 using BlogApi.Core.IRepository;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Session;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace BlogApi.Infrastructure.Data.Repositories
 {
-    public class LikePostRepository : ILikePostRepository
+    public class LikePostRepository(IAsyncDocumentSession session) : ILikePostRepository
     {
-        private readonly IAsyncDocumentSession _session;
-
-        public LikePostRepository(IAsyncDocumentSession session)
-        {
-            _session = session ?? throw new ArgumentNullException(nameof(session));
-        }
+        private readonly IAsyncDocumentSession _session = session ?? throw new ArgumentNullException(nameof(session));
 
         public async Task<IEnumerable<LikePost>> GetAllLikePostsAsync()
         {
             return await _session.Query<LikePost>().ToListAsync();
         }
 
-        public async Task<LikePost> GetLikePostByIdAsync(string userId, string postId)
+        public async Task<LikePost?> GetLikePostByIdAsync(string userId, string postId)
         {
             return await _session.LoadAsync<LikePost>($"{userId}_{postId}");
         }
@@ -41,7 +32,7 @@ namespace BlogApi.Infrastructure.Data.Repositories
 
         public async Task UpdateLikePostAsync(LikePost likePost)
         {
-            var existingLikePost = await _session.LoadAsync<LikePost>($"{likePost.UserId}_{likePost.PostId}");
+            var existingLikePost = await GetLikePostByIdAsync(likePost.UserId, likePost.PostId);
             if (existingLikePost != null)
             {
                 existingLikePost.Post = likePost.Post;

@@ -38,7 +38,7 @@ namespace BlogApi.Application.Services
         }
 
         // Retorna um post específico pelo ID
-        public async Task<Post?> GetPostByIdAsync(string id)
+        public async Task<Post> GetPostByIdAsync(string id)
         {
             // Converter o ID recebido para o formato esperado pelo RavenDB
             string decodedId = HttpUtility.UrlDecode(id);

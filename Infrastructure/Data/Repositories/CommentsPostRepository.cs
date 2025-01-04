@@ -2,28 +2,19 @@
 using BlogApi.Core.IRepository;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Session;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace BlogApi.Infrastructure.Data.Repositories
 {
-    public class CommentsPostRepository : ICommentsPostRepository
+    public class CommentsPostRepository(IAsyncDocumentSession session) : ICommentsPostRepository
     {
-        private readonly IAsyncDocumentSession _session;
-
-        public CommentsPostRepository(IAsyncDocumentSession session)
-        {
-            _session = session ?? throw new ArgumentNullException(nameof(session));
-        }
+        private readonly IAsyncDocumentSession _session = session ?? throw new ArgumentNullException(nameof(session));
 
         public async Task<IEnumerable<CommentsPost>> GetAllCommentsPostsAsync()
         {
             return await _session.Query<CommentsPost>().ToListAsync();
         }
 
-        public async Task<CommentsPost> GetCommentsPostByIdAsync(string commentsPostId)
+        public async Task<CommentsPost?> GetCommentsPostByIdAsync(string commentsPostId)
         {
             return await _session.LoadAsync<CommentsPost>(commentsPostId);
         }
@@ -41,7 +32,7 @@ namespace BlogApi.Infrastructure.Data.Repositories
 
         public async Task UpdateCommentsPostAsync(CommentsPost commentsPost)
         {
-            var existingCommentsPost = await _session.LoadAsync<CommentsPost>(commentsPost.Id);
+            var existingCommentsPost = await GetCommentsPostByIdAsync(commentsPost.Id);
             if (existingCommentsPost != null)
             {
                 existingCommentsPost.Content = commentsPost.Content;
